@@ -1,0 +1,59 @@
+---
+title: "Week 11 Discussion"
+author: "Kayleah Griffen"
+date: "4/2/2023"
+output: html_document
+---
+
+## Introduction
+
+The task for this week is to  analyze an existing recommender system. The requirements are to:
+
+1) Perform a Scenario Design analysis. Consider whether it makes sense for your selected recommender system to perform scenario design twice, once for the organization and once for the organization's customers. Scenario design is a three question framework which asks (a) Who are your target users? (b) What are their key goals? (c) How can the organization help the users accomplish those goals?
+
+2) Reverse engineer the site based on the interface and any available information on the Internet or elsewhere
+
+3) Include specific recommendations about how to improve the site's recommendation capabilities going forward 
+
+I chose to analyze the reccomender system that Hinge, a dating app, uses to match people. 
+
+
+## Scenario Design for Hinge
+
+Below are the answers to the "Scenario Design" questions, answered from Hinge's perspective about their target users. It makes sense for Hinge to answer these questions for their customers during the product development phase, and revisit the questions throughout the products lifetime as the answers could change over time. 
+
+### Who are the target users?
+
+The target users for Hinge are people looking to find a relationship match. 
+
+### What are their key goals?
+
+The key goal of the user is to find a match (or matches) for their current relationship goals. 
+
+### How can the organization help the users accomplish those goals?
+
+The Hinge platform can help users accomplish their goals by providing them a simple to use framework for meeting their match(es). Hinge says that they are an "app designed to be deleted". The idea is that Hinge can facilitate the matchmaking process by providing several options. Once a person finds their person it is no longer necessary to use it and the app can be deleted unless the user falls into a special case where they are looking for multiple matches - possibly due to their desire for short term relationships or possibly because they are polygamous.
+
+## Hinge's Recommender System
+
+It has been reported that Hinge uses the "Gale-Shapley" algorithm for matchmaking, specifically for its "most compatible" (1). Two economists, Lloyd Shapley and Alvin Roth, were awarded the Nobel Prize in Economics for their creation (Shapley) and implementation (Roth) of the "Gale-Shapley" algorithm which is designed to "match different agents as well as possible" so that "matching is stable in the sense that two agents cannot be found who would prefer each other over their current counterparts" (2). In terms of Hinge's use of it, this means that they put people in the "most compatible" who you are likely to like and who are likely to like you back. In "Matching and Sorting in Online Dating" they use data provided by an unspecified online dating site to analyze if the Gale-Shapley algorithm is efficient and determine that it is (3). In addition to the use of the Gale-Shapley algorithm, it has been reported that Hinge uses collaborative filtering (4). The idea behind collaborative filtering is that recommendations are made based on similarity of users and/or items. In the case of Hinge this means people who have liked similar people to your like history will shape the future possible matches that are shown to you.
+
+## Improvements going forward
+
+One dark side of online dating, is that it has been reported that the apps reinforce racial divisions (5). Hinge has a category for race, and it can be used to filter people. Furthermore some people explicitly put it in their profile that they will not consider dating a specific race, this has been labeled sexual racism (5). The article "Debiasing Desire: Addressing Bias & Discrimination on Intimate Platforms" outlines ways in which bias can be mitigated. One way is rather than making sorting based on race simple, "seams" could be introduced into the process which would add changes for people to reflect further on their options and encourage people to see potential partners "undefined by race, ethnicity, or ability, rather than as nuisances to be screened out" (5). Furthermore, categorization could be done along lines that are not inherently biased (5). Additionally, this article brings into the picture algorithm bias, given that the data fed into the algorithm is biased, the outcome can be even more biased (5). In the case of dating algorithms this would mean if one race predominately likes people of the same race, that would continue to be reinforced by algorithm bias. Rather than use past data to inform matches, the algorithms could encourage "exploration" with a specific eye for diversity (5). Lastly, and importantly platforms can enforce anti-discrimination policies and also inform people about discrimination that has historically happened (5).
+
+Based on my understanding of Hinge's recommendation system and the De-biasing Desire article, I am confident that Hinge is currently reinforcing discrimination. My recommendation is that Hinge update it's collaborative filtering algorithm and Gale-Shapley algorithm to create representation across races. Hinge should also remove race as an option for filtering altogether. Hinge should do internal research to better understand and quantify what kindof bias is prevalent on their platform and make targeted efforts to combat them. Hinge should report on their diversity goals so that the public can hold hinge accountable for combating discrimination. The article "How to mitigate social bias in dating apps" brings forward ideas outside of encouraging exploration that will help mitigate social bias such as making it clear what the system is doing, how well it can do what it does, providing global controls and conveying the consequences of user actions (6).
+
+## Conclusion
+
+Using the dating platform, Hinge, as an example of a recommender system, the "Scenario Design" questions were answered and research was done into how their recommender system functions.
+
+## References 
+
+1) https://www.vice.com/en/article/z3e3bw/how-does-the-hinge-algorithm-work
+2) https://www.nobelprize.org/prizes/economic-sciences/2012/press-release/
+3) https://www-jstor-org.remote.baruch.cuny.edu/stable/27804924?sid=primo
+4) https://d3.harvard.edu/platform-rctom/submission/hinge-a-data-driven-matchmaker/
+5) http://infolab.stanford.edu/~ullman/mmds/ch9.pdf
+5) https://dl-acm-org.remote.baruch.cuny.edu/doi/pdf/10.1145/3274342
+6) https://uxdesign.cc/how-to-mitigate-social-bias-in-dating-apps-bcecee369d30
