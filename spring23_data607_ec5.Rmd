@@ -1,0 +1,169 @@
+---
+title: "Introduction to Modeling"
+author: "Kayleah Griffen"
+date: "2023-04-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The purpose of this assignment is to get an introduction to recommender systems and modeling. The global baseline estimate recommender is a basic recommender system that uses the overall average of all users ratings, the average of a specific users ratings for all the movies they watched, and the average rating across all users for a specific movie. 
+The formula is:
+
+Global Baseline Estimate = Mean movie rating overall + Specific movie rating relative to average + users rating relative to average
+
+As an extension, `tidymodels` can be used to implement other types of recommender systems to compare how they work in relation to each other.
+
+## Load packages
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(recommenderlab)
+library(kableExtra)
+```
+
+## Loading the data
+
+This dataset was previously collected via a google survey of my friends and family.
+
+```{r}
+path <- "https://raw.githubusercontent.com/klgriffen96/spring23_data607_wk11/main/movie_ratings.csv"
+df <- read.csv(path)
+kable(head(df))
+```
+
+## Clean data
+
+Select only the necessary columns and update the row values to numerics. 
+
+```{r}
+df <- df[c(2:8)]
+
+df[df == "1 - DISSAPOINTING"] <- 1
+df[df == "2 - BAD"] <- 2
+df[df == "3 - OKAY"] <- 3
+df[df == "4 - GOOD"] <- 4
+df[df == "5 - AMAZING"] <- 5
+df[df == "I did not watch this movie"] <- NA
+
+df[, 2:ncol(df)] <- lapply(2:ncol(df), function(x) as.numeric(df[[x]]))
+
+kable(head(df))
+```
+
+## Global Baseline Estimate Recommender
+
+The next step is to implement the global baseline estimate recommender. In order to recommend a movie with this method, three values need to be known:
+
+1) The overall mean movie rating across all users and all movies (avg overall)
+2) The average of a specific users ratings for all the movies they watched (avg user)
+3) The average rating across all users for a specific movie (avg movie)
+
+First, I will make a copy of the dataframe, called `df_predict` to store my predictions. I will turn the movies that were rated to "rated" so that they will not receive a prediction. The remaining movies will be NA until they are predicted.
+
+```{r}
+# Make a copy of the df
+df_predict <- df
+# Make the already rated movies to rated
+df_predict[df_predict > 0 & df_predict <= 5] <- "rated"
+```
+
+Now I can find the three key values that need to be known to do the calculation of the global baseline recommender.
+
+```{r}
+# Find the user average
+df$user_mean <- rowMeans(df[,2:ncol(df)], na.rm = TRUE)
+
+# Find the movie average
+cols <- colMeans(df[1:nrow(df),2:ncol(df)], na.rm = TRUE)
+
+# Find the average overall
+avg_overall <- cols[["user_mean"]]
+```
+
+Now I can implement the recommender.
+
+```{r}
+# All rows
+for (i in 1:dim(df_predict)[1]){
+  # Columns for ratings
+  for (ii in 2:(dim(df_predict)[2]))
+    # Check if need to calculate rating
+    if (is.na(df_predict[i,ii])){
+      user_rel <- df$user_mean[i] - avg_overall
+      movie_rel <- cols[[ii - 1]] - avg_overall
+      df_predict[i,ii] <- round(avg_overall + user_rel + movie_rel,1)
+    }
+}
+
+kable(head(df_predict))
+```
+
+
+Looking at the data - sometimes the rating goes above 5 and sometimes it goes below 1 - which were my limits. For this reason I will filter those.
+
+```{r}
+df_predict[df_predict > 5 & df_predict != "rated"] <- 5
+df_predict[df_predict < 1] <- 1
+```
+
+
+Now the global baseline estimator has been implemented.
+
+## Alternative Recommender
+
+The global baseline estimator can be compared to other methods of recommender engines. `recommenderlab` is a library in R that " aims at providing a comprehensive research infrastructure for recommender systems" essentially meaning that it allows researchers a simple mechanism for implementing different types of recommender engines and deciding what is best for their purposes. Below I will implement a User Based Collaborative Filtering algorithm based on the examples section in "recommenderlab: An R Framework for Developing and Testing Recommendation Algorithms" (1). User Based Collaborative Filtering recommends items (in this case movies) based on similarities between users (2).
+
+The first steps are to create the matrix and turn it into a `realRatingMatrix`.
+
+```{r}
+# convert dataframe to matrix
+m_df <- as.matrix(df[,2:(ncol(df)-1)])
+
+# convert to realRatingMatrix (sparse format)
+r <- as(m_df, "realRatingMatrix")
+
+# check out the matrix
+head(getRatingMatrix(r))
+
+# check distribution
+hist(getRatings(r), breaks=5)
+```
+
+Now the recommender can be implemented, evaluated and the error plot generated.
+
+```{r}
+# set seed for consistency
+set.seed(09041996)
+
+# create an evaluation scheme
+e <- evaluationScheme(r, method="split", train=0.8, given=-2, goodRating=5)
+
+# comparing multiple
+algorithms <- list(
+  "random items" = list(name="RANDOM", param=NULL),
+  "popular items" = list(name="POPULAR", param=NULL),
+  "user-based CF" = list(name="UBCF", param=NULL),
+  "item-based CF" = list(name="IBCF", param=NULL),
+  "SVD approximation" = list(name="SVD", param=list(k = 3))
+  )
+
+results <- evaluate(e, algorithms, type = "ratings")
+
+plot(results, ylim = c(0,5))
+```
+
+Based on this plot, the item-based collaborative filter had the least error.
+
+## Conclusion
+
+In conclusion a global baseline estimate recommender was implemented. Additionally basic functionality of `recommenderlab` was explored to see what type of recommender in it's fleet had the least error.
+
+## Citations 
+
+1) recommenderlab: An R Framework for Developing and Testing Recommendation Algorithms (https://cran.r-project.org/web/packages/recommenderlab/vignettes/recommenderlab.pdf)
+2) Recommendation Systems (http://infolab.stanford.edu/~ullman/mmds/ch9.pdf)
